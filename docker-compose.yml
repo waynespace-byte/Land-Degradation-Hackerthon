@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: terasync_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password  # Change in .env for security
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d terasync_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/terasync_db  # Links to DB service
+      JWT_SECRET: your-super-secret-jwt-key-change-in-prod
+    volumes:
+      - ./backend:/app  # For hot-reload in dev
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "3000:80"  # Nginx serves on 80
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app  # For dev hot-reload (overrides build; use npm start in dev)
+
+volumes:
+  postgres_data:
