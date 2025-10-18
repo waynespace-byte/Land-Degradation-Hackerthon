@@ -9,9 +9,15 @@ const Dashboard = ({ token }) => {
   const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
-    fetchLands();
-    fetchAlerts();
-  }, []);
+  if (props && props.token) {
+    fetch('http://localhost:8000/api/lands', {
+      headers: {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${props.token}`
+      }
+    }).then(res => res.json()).then(data => setLands(data)).catch(err => console.error(err));
+  }
+}, [props.token]);
 
   const fetchLands = async () => {
     try {

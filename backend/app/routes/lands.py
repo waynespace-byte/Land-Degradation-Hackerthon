@@ -16,10 +16,10 @@ def create_land(land: schemas.LandCreate, current_user: models.User = Depends(au
     )
     return crud.create_land(db=db, land=db_land)
 
-@router.get("/", response_model=List[schemas.Land])
+@router.get("", response_model=List[schemas.Land])
 def read_lands(current_user: Optional[models.User] = Depends(auth.get_current_user_optional), db: Session = Depends(get_db)):
     user_id = current_user.id if current_user else None
-    return crud.get_lands(db, user_id=user_id)  # Empty list if no user (avoids 403)
+    return crud.get_lands(db, user_id=user_id)
 
 @router.post("/{land_id}/analyze", response_model=dict)  # Added: response_model for clarity (dict for {"ndvi": ..., "degraded": ...})
 def analyze_ndvi(land_id: int, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):

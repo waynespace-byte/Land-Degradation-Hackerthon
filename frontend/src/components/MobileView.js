@@ -9,8 +9,17 @@ const MobileView = ({ token }) => {
   const [selectedLand, setSelectedLand] = useState(null);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+  if (props && props.token) {
+      fetch('http://localhost:8000/api/lands', {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${props.token}`
+        }
+      }).then(res => res.json()).then(data => setLands(data)).catch(err => console.error(err));
+    }
+  }, [props.token]);
+  
+  
 
   const fetchData = async () => {
     try {

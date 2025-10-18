@@ -4,6 +4,29 @@ import MobileView from './components/MobileView';
 import { useMediaQuery } from 'react-responsive'; // npm install react-responsive if needed
 import './styles.css';
 
+// Add this ErrorBoundary component at the top of your file or in a separate file
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error caught in boundary:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong. Please refresh the page.</h1>;
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [user, setUser] = useState(null);
@@ -37,19 +60,21 @@ function App() {
           <input type="password" placeholder="Password" required />
           <button type="submit">Login</button>
         </form>
-        <p>Demo: Use email 'farmer@example.com' / pass 'password' (register via API first)</p>
+        <p>Demo: Use email &apos;farmer@example.com&apos; / pass &apos;password&apos; (register via API first)</p>
       </div>
     );
   }
 
   return (
-    <div className="App">
-      <header>
-        <h1>TerraSync {user?.role ? ` - ${user.role.charAt(0).toUpperCase() + user.role.slice(1)} Dashboard` : ''}</h1>
-        <button onClick={handleLogout}>Logout</button>
-      </header>
-      {isMobile ? <MobileView token={token} /> : <Dashboard token={token} />}
-    </div>
+    <ErrorBoundary>  {/* Wrap your app content with ErrorBoundary */}
+      <div className="App">
+        <header>
+          <h1>TerraSync {user?.role ? ` - ${user.role.charAt(0).toUpperCase() + user.role.slice(1)} Dashboard` : ''}</h1>
+          <button onClick={handleLogout}>Logout</button>
+        </header>
+        {isMobile ? <MobileView token={token} /> : <Dashboard token={token} />}
+      </div>
+    </ErrorBoundary>
   );
 }
 

@@ -7,9 +7,9 @@ from typing import Optional, List
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 
-@router.get("/", response_model=List[schemas.Alert])
+@router.get("", response_model=List[schemas.Alert])  # Matches /api/alerts exactly, no redirect
 def read_alerts(
-    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),  # Optional auth to avoid 403
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional),
     land_id: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
@@ -22,8 +22,7 @@ def read_alerts(
         if land_id and land_id in user_lands:
             query = query.filter(models.Alert.land_id == land_id)
         return query.all()
-    # Empty list if no user (demo tolerance)
-    return []
+    return []  # Returns [] if no token, no 403
 
 @router.post("/{alert_id}/resolve")
 def resolve_alert(
